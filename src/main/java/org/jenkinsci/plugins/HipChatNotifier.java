@@ -147,23 +147,30 @@ public class HipChatNotifier extends Notifier {
         logger.println("HipChat Post   : " + shouldPost(build));
         logger.println("HipChat Notify : " + shouldNotify(build));
 
-        if (token.length() > 0 && room.length() > 0 && shouldPost(build)) {
-            boolean notifyResult = new HipChat(token, server).notify(
-                    room,
-                    new NotifyMessage(
-                            NotifyMessage.BackgroundColor.get(build.getResult().color),
-                            buildMessage(build, listener),
-                            shouldNotify(build)
-                    )
-            );
-            if (notifyResult) {
-                logger.println("HipChat Notification OK");
-            } else {
-                logger.println("HipChat Notification Failed");
-            }
-        } else {
-            logger.println("HipChatNotifier InvalidSettings.");
+        if (token.length() == 0 && room.length() == 0) {
+            logger.println("HipChat notifier settings are invalid - supply an API token and room ID.");
+            return true;
         }
+
+        if (!shouldPost(build)) {
+            logger.println("HipChat notifier not posting");
+            return true;
+        }
+
+        boolean notifyResult = new HipChat(token, server).notify(
+            room,
+            new NotifyMessage(
+                NotifyMessage.BackgroundColor.get(build.getResult().color),
+                buildMessage(build, listener),
+                shouldNotify(build)
+            )
+        );
+        if (notifyResult) {
+            logger.println("HipChat notification OK");
+        } else {
+            logger.println("HipChat notification failed");
+        }
+
         return true;
     }
 
